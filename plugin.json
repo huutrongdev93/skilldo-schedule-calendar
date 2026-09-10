@@ -1,0 +1,17 @@
+{
+    "name" : "Lên lịch bài viết",
+    "class" : "ScheduleCalendar",
+    "url" : "https://sikido.vn",
+    "description":"Đặt lịch hẹn giờ post bài cho website là một cách để kiểm soát việc xuất bản nội dung một cách hiệu quả",
+    "author":"SKDSoftware Dev Team",
+    "version":"2.0.0",
+    "providers": [
+        "ScheduleCalendar\\Providers\\ScheduleCalendarServiceProvider"
+    ],
+    "autoload": {
+        "alias": "ScheduleCalendar",
+        "psr-4": {
+            "ScheduleCalendar\\Schedules" : "app\\Schedules"
+        }
+    }
+}
