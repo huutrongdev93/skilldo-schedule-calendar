@@ -2,13 +2,22 @@
 
 <div class="box">
     <div class="box-content">
+        <div class="schedule-calendar-legend mb-3 d-flex flex-wrap align-items-center gap-3">
+            @foreach($types as $typeKey => $type)
+                <label class="schedule-calendar-legend__item d-inline-flex align-items-center gap-2 mb-0">
+                    <input type="checkbox" class="js_schedule_calendar_type" value="{{ $typeKey }}" checked>
+                    <span class="schedule-calendar-legend__dot" style="background-color: {{ $type['color'] }}"></span>
+                    <span>{!! $type['icon'] !!} {{ $type['label'] }}</span>
+                </label>
+            @endforeach
+        </div>
         <div id='calendar'></div>
     </div>
 </div>
 <script id="template_calendar_post_event" type="text/x-custom-template">
-    <div class="event-item">
+    <div class="event-item" style="border-left: 3px solid ${typeColor}">
         <div class="event-header d-flex justify-content-between mb-1">
-            <p class="mb-0"><i class="fa-duotone fa-solid fa-books"></i> Blog</p>
+            <p class="mb-0">${typeIcon} ${typeLabel}</p>
             <p class="mb-0">${scheduleTime}</p>
         </div>
         <div class="event-img mb-1">
@@ -46,6 +55,16 @@
         border: 1px solid #efefef;
     }
 
+    .schedule-calendar-legend__item {
+        cursor: pointer;
+    }
+    .schedule-calendar-legend__dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
     .event-item {
         padding: 5px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
@@ -71,6 +90,19 @@
 
         let calendarEl = document.getElementById('calendar');
 
+        let typeInputs = document.querySelectorAll('.js_schedule_calendar_type');
+
+        /* Các loại nội dung đang được tích chọn ở phần chú giải. */
+        function selectedTypes() {
+            let types = [];
+            typeInputs.forEach(function (input) {
+                if (input.checked) {
+                    types.push(input.value);
+                }
+            });
+            return types;
+        }
+
         let calendar = new FullCalendar.Calendar(calendarEl, {
             timeZone: 'UTC+7',
             initialView: 'dayGridWeek',
@@ -92,19 +124,20 @@
             eventDrop: function(info) {
                 let today = new Date();
                 if (info.event.start < today) {
-                    SkilldoMessage.error('Không thể kéo bài viết về quá khứ!');
+                    SkilldoMessage.error('Không thể kéo nội dung về quá khứ!');
                     info.revert();
                 }
                 else
                 {
                     request.post(ajax, {
                         action: 'ScheduleCalendar\\Ajax\\Admin\\ScheduleCalendarAjax::update',
-                        id: info.event.id,
+                        id: info.event.extendedProps.objectId,
+                        type: info.event.extendedProps.type,
                         start: info.event.start.valueOf(),
                     })
                     .then(function (response) {
                         if (response.status === 'error') {
-                            SkilldoMessage.error('Cập nhật lịch thất bại!');
+                            SkilldoMessage.response(response);
                             info.revert();
                         }
                     })
@@ -113,6 +146,7 @@
             events: function (info, successCallback, failureCallback) {
                 request.post(ajax, {
                     action: 'ScheduleCalendar\\Ajax\\Admin\\ScheduleCalendarAjax::data',
+                    types: selectedTypes(),
                     start: info.start.valueOf(),
                     end: info.end.valueOf()
                 })
@@ -135,6 +169,12 @@
 
                 info.event.slug = info.event.extendedProps.slug
 
+                info.event.typeLabel = info.event.extendedProps.typeLabel
+
+                info.event.typeIcon = info.event.extendedProps.typeIcon
+
+                info.event.typeColor = info.event.extendedProps.typeColor
+
                 italicEl.innerHTML = html.split(/\$\{(.+?)\}/g).map(render(info.event)).join('');
 
                 let arrayOfDomNodes = [ italicEl ]
@@ -144,5 +184,11 @@
         });
 
         calendar.render();
+
+        typeInputs.forEach(function (input) {
+            input.addEventListener('change', function () {
+                calendar.refetchEvents();
+            });
+        });
     });
 </script>
