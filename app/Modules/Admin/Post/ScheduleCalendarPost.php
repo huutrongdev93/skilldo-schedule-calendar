@@ -142,6 +142,13 @@ Class ScheduleCalendarPost
             return $error;
         }
 
+        // Core < 8.2.5: Builder::create() truyền chính Builder vào filter này
+        // (Model::save() thì truyền Model) — lấy model ra để chạy được cả hai.
+        if($model instanceof \SkillDo\Database\Eloquent\Builder)
+        {
+            $model = $model->getModel();
+        }
+
         $attributes = $model->getAttributes();
 
         if(!isset($attributes['public']) || (int)$attributes['public'] !== 1)

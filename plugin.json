@@ -4,7 +4,7 @@
     "url" : "https://sikido.vn",
     "description":"Hẹn giờ xuất bản bài viết và sản phẩm, quản lý toàn bộ lịch đăng trên một khung lịch kéo thả",
     "author":"SKDSoftware Dev Team",
-    "version":"2.1.0",
+    "version":"2.1.1",
     "providers": [
         "ScheduleCalendar\\Providers\\ScheduleCalendarServiceProvider"
     ],
