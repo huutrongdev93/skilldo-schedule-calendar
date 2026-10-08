@@ -177,6 +177,16 @@
 
                 italicEl.innerHTML = html.split(/\$\{(.+?)\}/g).map(render(info.event)).join('');
 
+                // Bài không có ảnh đại diện (hoặc ảnh lỗi): bỏ khung ảnh thay vì để icon ảnh vỡ
+                italicEl.querySelectorAll('.event-img').forEach(function (box) {
+                    let img = box.querySelector('img')
+                    if (!img || !img.getAttribute('src')) {
+                        box.remove()
+                    } else {
+                        img.onerror = function () { box.remove() }
+                    }
+                })
+
                 let arrayOfDomNodes = [ italicEl ]
 
                 return { domNodes: arrayOfDomNodes }
